@@ -1,24 +1,40 @@
-from beautySoupScraper import BeautySoupScraper
-from wordSearcher import WordSearcher
-from configuration import Configuration
-from seleniumHtmlProvider import SeleniumHtmlProvider
 import sys
+
+import userUi
+from configuration import Configuration
+from htmlProvider import HtmlProvider
+from postsFilter import PostsFilter
+from postsScraper import PostsScraper
+from pyMongoHandler import PyMongoHandler
+
 
 
 class Orchestrator(object):
-
+    #TODO: move elsewhere
     def setEncoding(self):
         reload(sys)
         sys.setdefaultencoding('utf8')
 
-    def orchestrate(self):
+    def orchestrate(self, configPath):
         self.setEncoding()
-        config = Configuration(sys.argv.pop(1)).config
-        provider = SeleniumHtmlProvider(config).getFbHtml()
-        html = provider
-        posts = BeautySoupScraper().scrapePosts(html)
-        # TODO: handle res
-        res = WordSearcher(config).searchWord(posts)
 
+        config = Configuration(configPath).config
 
-Orchestrator().orchestrate()
+        dbHandler = PyMongoHandler(config)
+        print 'getting HTML'
+        html = HtmlProvider(config).getFbHtml()
+
+        print 'scraping posts'
+        posts = PostsScraper().scrapePosts(html)
+
+        print 'sorting posts'
+        sorted = PostsFilter().searchWord(posts)
+
+        print 'insert to db'
+        dbHandler.writeToDb(sorted)
+        while True:
+            print 'loading from db'
+            loadedPosts = dbHandler.loadFromDb()
+            print 'printing to user'
+            userUi.createTable(loadedPosts, dbHandler)
+
