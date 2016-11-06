@@ -41,8 +41,8 @@ class PyMongoHandler(object):
     #write new and relevant posts to DB
     #filtered as irrelevant posts go to 'bad posts db'
     def writeToDb(self, posts):
-        self.insertToDB(posts["good_posts"],self.db)
-        self.insertToDB(posts["bad_posts"], self.db)
+        self.insertToDB(posts["good_posts"],self.db[self.collection_name])
+        self.insertToDB(posts["bad_posts"], self.db.badPosts)
 
     #TODO: merge methods
     #if user marked post as irrelevant - ignore, later on - a routine cleaning will be added
@@ -51,22 +51,23 @@ class PyMongoHandler(object):
         db = self.db
         res = []
         for p in posts:
-            val1 = db[self.collection_name].find({"_id": p})
-            res.append(val1)
+            relevant_post = db[self.collection_name].find({"_id": p})
+            res.append(relevant_post)
             db[self.collection_name].update({"_id": p}, {"$set": {"irrelevant": "True"}}, True)
 
         print 'updated irrelevant'
 
     '''when user updated this job as relevant, and we recognized email, auto send mail.
     otherwise - assume the user sent it himself and simply update DB'''
-    def updateSent(self,posts):
+    def updateSent(self, post_ids):
         #TODO: write nicer loop
         db = self.db
-        posts = []
-        for p in posts:
-            posts = db[self.collection_name].find({"_id": p})
-            posts.append(posts)
-            post = list(posts)
+
+        res = []
+        for p in post_ids:
+            relevant_post = db[self.collection_name].find({"_id": p})
+            res.append(relevant_post)
+            post = list(relevant_post)
             if('email'  in post[0].keys()):
                 mail = post[0]["email"]
                 print 'sending ' +mail
