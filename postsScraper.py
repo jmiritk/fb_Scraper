@@ -7,8 +7,8 @@ import re
 class PostsScraper(object):
     # this method creates a list of posts
     def scrapePosts(self, raw_html):
+        print 'scraping posts'
         soup = BeautifulSoup(raw_html, 'html.parser')
-        print 'got html'
         posts = []
 
         for itm in soup.find_all("div", class_="userContentWrapper"):
@@ -24,7 +24,6 @@ class PostsScraper(object):
    # each post post is a dictionary
     def collectPostInfo(self, itm):
         post = {}
-        #post['test'] = 'test1'
         post['content'] = self.getContent(itm.find("div", class_="userContent"))
         post['date'] = itm.find("abbr")['data-utime']
         post['user_name'] = itm.find("span", class_="fwb").getText()
