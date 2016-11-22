@@ -1,7 +1,7 @@
 # FBScraper
 FB groups scraper in Python 2.7 <br />
 <br />
-ABOUT THE PROJECT: 
+ABOUT THE PROJECT: <br />
 This is one of my first projects using the Python language.<br />
 It was created to deepen my knowlage in python and help filter the information needed for me.<br />
 Written for the groups that does not support using Graph API.<br />
